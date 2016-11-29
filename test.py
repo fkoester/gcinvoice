@@ -3,12 +3,16 @@
 Run this module as script to perform all tests.
 
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 
 import sys
 import subprocess
 import re
 from decimal import Decimal
-import StringIO
+import io
 import textwrap
 import datetime
 import optparse
@@ -22,8 +26,8 @@ try:
     locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
     test_locale = True
 except locale.Error:
-    print "Using module 'locale' for number formatting will not be tested"
-    print "because the locale 'de_DE.UTF-8' is not avaible"
+    print("Using module 'locale' for number formatting will not be tested")
+    print("because the locale 'de_DE.UTF-8' is not avaible")
     test_locale = False
 
 suite = unittest.TestSuite()
@@ -178,7 +182,7 @@ class TestYaptu(unittest.TestCase):
         rco = re.compile('%= ')
         temp_dict = {'a': 'a1', 'b': u'\u01222', 'c': 5, 'li': [5,4,3],
                 'di': dict(x=1, y=2)}
-        templ_out = StringIO.StringIO()
+        templ_out = io.StringIO()
         templ_in = [(line+'\n') for line in textwrap.dedent(
                 u"""\
                 a = @{a}
@@ -582,7 +586,7 @@ class TestMain(unittest.TestCase):
                 'billing_id': None, 'guid': 'eaa069411f46260c90db6d852984861d',
                 'id': 5},
             })
-        for t in self.gc.taxtables.itervalues():
+        for t in self.gc.taxtables.values():
             # the entries are in random order, bad to test.
             del t['entries']
         self.assertEqual(self.gc.taxtables, {
@@ -601,7 +605,7 @@ class TestMain(unittest.TestCase):
         self.gc.options.quantities_precision = 1
         self.gc.options.currency_uselocale = False
         self.gc.options.currency_precision = 3
-        outf = StringIO.StringIO()
+        outf = io.StringIO()
         self.gc.createInvoice(1, outfile=outf, template=template)
         result = outf.getvalue()
         outf.close()
@@ -628,7 +632,7 @@ class TestMain(unittest.TestCase):
         if test_locale:
             self.gc.options.quantities_uselocale = True
             self.gc.options.currency_uselocale = True
-            outf = StringIO.StringIO()
+            outf = io.StringIO()
             self.gc.createInvoice(1, outfile=outf, template=template)
             result = outf.getvalue()
             outf.close()
@@ -657,7 +661,7 @@ class TestMain(unittest.TestCase):
         self.gc.options.quantities_uselocale = False
         self.gc.options.quantities_precision = 1
         self.gc.options.cformat = cformat
-        outf = StringIO.StringIO()
+        outf = io.StringIO()
         self.gc.createInvoice(1, outfile=outf, template=template)
         result = outf.getvalue()
         outf.close()
@@ -699,7 +703,7 @@ class TestScript(unittest.TestCase):
         options.quantities_precision = 1
         options.currency_uselocale = False
         options.currency_precision = 3
-        outf = StringIO.StringIO()
+        outf = io.StringIO()
         gcinvoice.createInvoice(1, template=template, outfile=outf,
                 options=options)
         result = outf.getvalue()

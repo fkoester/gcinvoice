@@ -10,6 +10,14 @@ run as script. Finally there is an Exception class 'GcinvoiceError'. These are
 the only 3 names imported by 'import * from gcinvoice'.
 
 """
+from __future__ import division
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.builtins import basestring
+from builtins import object
+from past.utils import old_div
 
 __version__ = '0.1.5'
 
@@ -18,7 +26,7 @@ import sys
 import copy
 import gzip
 from string import Template
-import StringIO
+import io
 import textwrap
 import re
 import datetime
@@ -26,7 +34,7 @@ from decimal import Decimal, localcontext
 import functools
 import logging
 import optparse
-import ConfigParser
+import configparser
 from operator import itemgetter
 get0 = itemgetter(0)
 get_entered = itemgetter('entered')
@@ -351,7 +359,7 @@ class Gcinvoice(object):
                 continue
             try:
                 self._calcTaxDiscount(entrydict)
-            except GcinvoiceError, msg:
+            except GcinvoiceError as msg:
                 self.logger.error(msg)
                 continue
             if entrydict.get('_warndiscount', False):
@@ -359,7 +367,7 @@ class Gcinvoice(object):
                 self.invoices_[invoiceguid]['_warndiscount'] = True
             self.entries[entrydict['guid']] = entrydict
             invoiceentries.append(entrydict)
-        for iv in self.invoices.itervalues():
+        for iv in self.invoices.values():
             iv['entries'].sort(key=get_entered)
 
         self.logger.info("Successfully parsed Gnucash data file '%s'." %
@@ -471,7 +479,7 @@ class Gcinvoice(object):
         if isinstance(template, basestring):
             # The name of the template file is itself a template in order to
             # select different templates depending on the invoice.
-            templ_ = StringIO.StringIO()
+            templ_ = io.StringIO()
             cop = _copier(rex, invc, rbe, ren, rco, ouf=templ_,
                 encoding=self._gcfile_encoding)
             cop.copy([template])
@@ -512,7 +520,7 @@ class Gcinvoice(object):
         if isinstance(outfile, basestring):
             # The name of the outfile is itself a template in order to
             # select different outfiles depending on the invoice.
-            outf_ = StringIO.StringIO()
+            outf_ = io.StringIO()
             cop = _copier(rex, invc, rbe, ren, rco, ouf=outf_,
                     encoding=self._gcfile_encoding)
             cop.copy([outfile])
@@ -618,11 +626,11 @@ class Gcinvoice(object):
                 if entry['amount_discount']:
                     entry['_warndiscount'] = True
                 entry['amount_gross'] = amount_raw - entry['amount_discount']
-                entry['amount_net'] = (entry['amount_gross'] -
-                    taxtable['value_sum']) / (1 + taxtable['percent_sum']/100)
+                entry['amount_net'] = old_div((entry['amount_gross'] -
+                    taxtable['value_sum']), (1 + old_div(taxtable['percent_sum'],100)))
             else:
-                amount_raw_net = (amount_raw - taxtable['value_sum']) / \
-                        (1 + taxtable['percent_sum'] / 100)
+                amount_raw_net = old_div((amount_raw - taxtable['value_sum']), \
+                        (1 + old_div(taxtable['percent_sum'], 100)))
                 if discount_type == 'VALUE':
                     entry['amount_discount'] = discount
                 else:
@@ -630,7 +638,7 @@ class Gcinvoice(object):
                 entry['amount_net'] = amount_raw_net - entry['amount_discount']
                 if discount_how == 'PRETAX':
                     entry['amount_gross'] = entry['amount_net'] * (1 +
-                        taxtable['percent_sum'] / 100) + taxtable['value_sum']
+                        old_div(taxtable['percent_sum'], 100)) + taxtable['value_sum']
                 elif discount_how == 'SAMETIME':
                     entry['amount_gross'] = amount_raw - \
                         entry['amount_discount']
@@ -640,7 +648,7 @@ class Gcinvoice(object):
         else:
             if discount_how == 'POSTTAX':
                 amount_raw_gross = amount_raw * (1 +
-                        taxtable['percent_sum']/100) + taxtable['value_sum']
+                        old_div(taxtable['percent_sum'],100)) + taxtable['value_sum']
                 if discount_type == 'VALUE':
                     entry['amount_discount'] = discount
                 else:
@@ -649,8 +657,8 @@ class Gcinvoice(object):
                     entry['_warndiscount'] = True
                 entry['amount_gross'] = amount_raw_gross - \
                         entry['amount_discount']
-                entry['amount_net'] = (entry['amount_gross'] -
-                    taxtable['value_sum']) / (1 + taxtable['percent_sum']/100)
+                entry['amount_net'] = old_div((entry['amount_gross'] -
+                    taxtable['value_sum']), (1 + old_div(taxtable['percent_sum'],100)))
             else:
                 if discount_type == 'VALUE':
                     entry['amount_discount'] = discount
@@ -659,10 +667,10 @@ class Gcinvoice(object):
                 entry['amount_net'] = amount_raw - entry['amount_discount']
                 if discount_how == 'PRETAX':
                     entry['amount_gross'] = entry['amount_net'] * (1 +
-                        taxtable['percent_sum']/100) + taxtable['value_sum']
+                        old_div(taxtable['percent_sum'],100)) + taxtable['value_sum']
                 elif discount_how == 'SAMETIME':
                     amount_raw_gross = amount_raw * (1 +
-                        taxtable['percent_sum']/100) + taxtable['value_sum']
+                        old_div(taxtable['percent_sum'],100)) + taxtable['value_sum']
                     entry['amount_gross'] = amount_raw_gross - \
                         entry['amount_discount']
                 else:
@@ -687,20 +695,20 @@ def _parse_configfiles(configfiles=None, options=None):
     """
     options = options or optparse.Values()
     filenames = list(configfiles) if configfiles else []
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     parsed_files = config.read(filenames)
     try:
         for k,v in config.items('GENERAL'):
             if getattr(options, k, None) is None:
                 setattr(options, k, v)
-    except ConfigParser.NoSectionError:
+    except configparser.NoSectionError:
         pass
     for section in 'TEMPLATES', 'OUTFILES':
         d = getattr(options, section.lower(), dict())
         try:
             for k,v in config.items(section):
                 d.setdefault(k, v)
-        except ConfigParser.NoSectionError:
+        except configparser.NoSectionError:
             pass
         finally:
             setattr(options, section.lower(), d)
@@ -719,7 +727,7 @@ def _readnumber(val):
 
     """
     n,d = [Decimal(x) for x in val.split('/', 1)]
-    return n/d
+    return old_div(n,d)
 
 def _readdate(timestring):
     """Get a date object from a Gnucash datetime string.
@@ -782,7 +790,7 @@ def _currencyformatting(val, uselocale=True, precision=None, dashsymb=None):
                     val = u'%s%s%s' % (parts[0], dp, dashsymb)
             except:
                 pass
-    return unicode(val)
+    return str(val)
 
 
 def _quantityformatting(val, uselocale=True, precision=None, dashsymb=None):
@@ -816,7 +824,7 @@ def _quantityformatting(val, uselocale=True, precision=None, dashsymb=None):
                     val = u'%s%s%s' % (parts[0], dp, dashsymb)
             except:
                 pass
-    return unicode(val)
+    return str(val)
 
 def intid(id):
     """Convert id to an integer, if possible.
@@ -851,7 +859,7 @@ class _MyTemplate(Template):
 # Adapted by Roman Bertle for the needs of this module.
 
 # utility stuff to avoid tests in the mainline code
-class _nevermatch:
+class _nevermatch(object):
     "Polymorphic with a regex that never matches"
     def match(self, line):
         return None
@@ -864,7 +872,7 @@ def _nohandle(string):
     raise
 
 # and now the real thing
-class _copier:
+class _copier(object):
     "Smart-copier (YAPTU) class"
     def copyblock(self, i=0, last=None):
         "Main copy method: process lines [i,last) of block"
@@ -872,8 +880,8 @@ class _copier:
             "return the eval of a found expression, for replacement"
             # uncomment for debug: print '!!! replacing',match.group(1)
             expr = self.preproc(match.group(1), 'eval')
-            try: return unicode(eval(expr, self.globals, self.locals))
-            except: return unicode(self.handle(expr))
+            try: return str(eval(expr, self.globals, self.locals))
+            except: return str(self.handle(expr))
         block = self.locals['_bl']
         if last is None: last = len(block)
         while i<last:
@@ -902,7 +910,7 @@ class _copier:
                 stat = self.preproc(stat, 'exec')
                 stat = '%s _cb(%s,%s)' % (stat,i+1,j)
                 # for debugging, uncomment...: print "-> Executing: {"+stat+"}"
-                exec stat in self.globals,self.locals
+                exec(stat, self.globals,self.locals)
                 i=j+1
             else:       # normal line, just copy with substitution
                 self.ouf.write(self.regex.sub(repl,line).encode(self.encoding))

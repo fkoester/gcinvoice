@@ -1,10 +1,11 @@
+from __future__ import unicode_literals
 from distutils.command.install import install as _install
 from distutils.core import setup
 import gcinvoice
 
 class install(_install):
     """Specialized Python installer.
-    
+
     This installer does not run install_scripts.
 
     """
@@ -31,7 +32,12 @@ can also be run as a script.
           'Intended Audience :: End Users/Desktop',
           'Intended Audience :: Financial and Insurance Industry',
           'License :: OSI Approved :: Python Software Foundation License',
-          'Programming Language :: Python',
+          'Programming Language :: Python :: 2',
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.3',
+          'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5',
           'Topic :: Office/Business :: Financial :: Accounting',
           ],
       py_modules=['gcinvoice'],
