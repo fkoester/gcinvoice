@@ -682,7 +682,7 @@ def _parse_configfiles(configfiles=None, options=None):
     """
     options = options or optparse.Values()
     filenames = list(configfiles) if configfiles else []
-    config = configparser.ConfigParser()
+    config = configparser.RawConfigParser()
     parsed_files = config.read(filenames)
     try:
         for k,v in config.items('GENERAL'):
