@@ -22,6 +22,7 @@ from past.utils import old_div
 __version__ = '0.1.5'
 
 import os
+import errno
 import sys
 import copy
 import gzip
@@ -45,6 +46,14 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
 
 # The main classes.
 
@@ -515,6 +524,10 @@ class Gcinvoice(object):
             outfile = outf_.getvalue()
             outf_.close()
             try:
+                if self.options.outfiles.get('mkdirs', None) == 'True':
+                    parent = os.path.dirname(outfile)
+                    self.logger.info("Creating parent directories [%s]" % parent)
+                    mkdir_p(parent)
                 outf = open(outfile, "w")
             except Exception:
                 self.logger.error("Cannot open [%s] for writing" % outfile,

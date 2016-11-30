@@ -42,5 +42,8 @@ default = invoice_template.tex
 #default = invoice@{id}.tex   # (not set)
 #default = invoice_@{date_posted.strftime("%Y-%m")}.tex   # (not set)
 
+## Whether to create parent directories if necessary
+mkdirs = False
+
 ## these map 'owner/name' entries in invoices to output files.
 #customer1 = specialinvoice.tex   # (not set)
