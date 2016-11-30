@@ -85,9 +85,6 @@ class Gcinvoice(object):
 
     _xmlns_re = re.compile(r'([_a-z][-_a-z0-9]*):')
 
-    _gcfile_encoding = 'utf-8'  # utf-8 seems to be used by Gnucash
-
-
     def __init__(self, options=None):
 
         """Create a Gcinvoice instance.
@@ -480,13 +477,12 @@ class Gcinvoice(object):
             # The name of the template file is itself a template in order to
             # select different templates depending on the invoice.
             templ_ = io.StringIO()
-            cop = _copier(rex, invc, rbe, ren, rco, ouf=templ_,
-                encoding=self._gcfile_encoding)
+            cop = _copier(rex, invc, rbe, ren, rco, ouf=templ_)
             cop.copy([template])
             templ = templ_.getvalue()
             templ_.close()
             try:
-                templ = file(templ)
+                templ = open(templ)
                 self.logger.info("Using file [%s] as template" % templ)
             except Exception:
                 self.logger.info("The given template [%s] is not readable, "
@@ -505,14 +501,7 @@ class Gcinvoice(object):
             templ = template
         if readfromfile:
             self.logger.info("Using [%s] as file object" % templ)
-            try:
-                templ = [line.decode(self._gcfile_encoding)
-                        for line in templ.readlines()]
-            except UnicodeDecodeError:
-                self.logger.error("The template file [%s] cannot be "
-                        "decoded using the encoding [%s] of Gnucash data files"
-                        % (template, self._gcfile_encoding), exc_info=True)
-                raise GcinvoiceError("The given template cannot be decoded")
+            templ = templ.readlines()
 
         outfile = outfile or \
                 self.options.outfiles.get(ownername, None) or \
@@ -521,13 +510,12 @@ class Gcinvoice(object):
             # The name of the outfile is itself a template in order to
             # select different outfiles depending on the invoice.
             outf_ = io.StringIO()
-            cop = _copier(rex, invc, rbe, ren, rco, ouf=outf_,
-                    encoding=self._gcfile_encoding)
+            cop = _copier(rex, invc, rbe, ren, rco, ouf=outf_)
             cop.copy([outfile])
             outfile = outf_.getvalue()
             outf_.close()
             try:
-                outf = file(outfile, "w")
+                outf = open(outfile, "w")
             except Exception:
                 self.logger.error("Cannot open [%s] for writing" % outfile,
                         exc_info=True)
@@ -544,8 +532,7 @@ class Gcinvoice(object):
             self.logger.warn("Cannot do template for expression [%s]" % expr,
                     exc_info=True)
             return expr
-        cop = _copier(rex, invc, rbe, ren, rco, ouf=outf, handle=handle,
-                encoding=self._gcfile_encoding)
+        cop = _copier(rex, invc, rbe, ren, rco, ouf=outf, handle=handle)
         try:
             cop.copy(templ)
         except Exception:
@@ -616,8 +603,8 @@ class Gcinvoice(object):
         if discount_type not in ('PERCENT', 'VALUE'):
             raise GcinvoiceError("Unknown discount type [%s] in entry [%s]" %
                     (discount_type, entry['guid']))
-            
-        if taxincluded: 
+
+        if taxincluded:
             if discount_how == 'POSTTAX':
                 if discount_type == 'VALUE':
                     entry['amount_discount'] = discount
@@ -771,7 +758,7 @@ def _currencyformatting(val, uselocale=True, precision=None, dashsymb=None):
     Examples:
         >>> _currencyformatting(Decimal("12.34567"), uselocale=False,
         ...     precision=3)
-        u'12.346'
+        '12.346'
 
     """
     val = Decimal(val)
@@ -785,9 +772,9 @@ def _currencyformatting(val, uselocale=True, precision=None, dashsymb=None):
             parts = val.rsplit(dp, 2)
             try:
                 if len(parts) == 1:
-                    val = u'%s%s%s' % (val, dp, dashsymb)
+                    val = "%s%s%s" % (val, dp, dashsymb)
                 elif not int(parts[1]):
-                    val = u'%s%s%s' % (parts[0], dp, dashsymb)
+                    val = "%s%s%s" % (parts[0], dp, dashsymb)
             except:
                 pass
     return str(val)
@@ -805,7 +792,7 @@ def _quantityformatting(val, uselocale=True, precision=None, dashsymb=None):
     Examples:
         >>> _quantityformatting(Decimal("12.34567"), uselocale=False,
         ...     precision=3)
-        u'12.346'
+        '12.346'
 
     """
     val = Decimal(val)
@@ -819,9 +806,9 @@ def _quantityformatting(val, uselocale=True, precision=None, dashsymb=None):
             parts = val.rsplit(dp, 2)
             try:
                 if len(parts) == 1:
-                    val = u'%s%s%s' % (val, dp, dashsymb)
+                    val = "%s%s%s" % (val, dp, dashsymb)
                 elif not int(parts[1]):
-                    val = u'%s%s%s' % (parts[0], dp, dashsymb)
+                    val = "%s%s%s" % (parts[0], dp, dashsymb)
             except:
                 pass
     return str(val)
@@ -885,7 +872,7 @@ class _copier(object):
         block = self.locals['_bl']
         if last is None: last = len(block)
         while i<last:
-            line = block[i]
+            line = str(block[i])
             match = self.restat.match(line)
             if match:   # a statement starts "here" (at line block[i])
                 # i is the last line to _not_ process
@@ -893,7 +880,7 @@ class _copier(object):
                 j=i+1   # look for 'finish' from here onwards
                 nest=1  # count nesting levels of statements
                 while j<last:
-                    line = block[j]
+                    line = str(block[j])
                     # first look for nested statements or 'finish' lines
                     if self.restend.match(line):    # found a statement-end
                         nest = nest - 1     # update (decrease) nesting
@@ -913,12 +900,11 @@ class _copier(object):
                 exec(stat, self.globals,self.locals)
                 i=j+1
             else:       # normal line, just copy with substitution
-                self.ouf.write(self.regex.sub(repl,line).encode(self.encoding))
+                self.ouf.write(self.regex.sub(repl,line))
                 i=i+1
     def __init__(self, regex=_never, dict={},
-            restat=_never, restend=_never, recont=_never, 
-            preproc=_identity, handle=_nohandle, ouf=sys.stdout,
-            encoding='ascii'):
+            restat=_never, restend=_never, recont=_never,
+            preproc=_identity, handle=_nohandle, ouf=sys.stdout):
         "Initialize self's attributes"
         self.regex   = regex
         self.globals = dict
@@ -929,7 +915,6 @@ class _copier(object):
         self.preproc = preproc
         self.handle  = handle
         self.ouf     = ouf
-        self.encoding = encoding
     def copy(self, block=None, inf=sys.stdin):
         "Entry point: copy-with-processing a file, or a block of lines"
         if block is None: block = inf.readlines()
@@ -983,4 +968,3 @@ if __name__ == '__main__':
 
     createInvoice(args[0], template=getattr(options, 'template', None),
             outfile=getattr(options, 'outfile', None), options=options)
-

@@ -40,7 +40,7 @@ suite.addTest(doctest.DocTestSuite(gcinvoice))
 
 # Some input data needed in various tests.
 
-template = textwrap.dedent(u"""\
+template = textwrap.dedent("""\
     id = @{id} | owner = @{owner['name']} | currency = @{ currency}
     notes = @{ notes}
     date_opened = @{ date_opened.strftime('%Y-%m-%d') }
@@ -114,56 +114,56 @@ class TestFuncs(unittest.TestCase):
     def testCurrencyformatting(self):
         """Test formatting of monetary values."""
         self.assertEqual(gcinvoice._currencyformatting(Decimal("12.34567"),
-            uselocale=False), u'12.34567')
+            uselocale=False), "12.34567")
         self.assertEqual(gcinvoice._currencyformatting(Decimal("12.34567"),
-            uselocale=False, precision=3), u'12.346')
+            uselocale=False, precision=3), "12.346")
         self.assertEqual(gcinvoice._currencyformatting(Decimal("12.00000"),
-            uselocale=False), u'12.00000')
+            uselocale=False), "12.00000")
         self.assertEqual(gcinvoice._currencyformatting(Decimal("12.00000"),
-            uselocale=False, precision=3), u'12.000')
+            uselocale=False, precision=3), "12.000")
         if test_locale:
             self.assertEqual(gcinvoice._currencyformatting(Decimal("12.34567"),
-                uselocale=True), u'12,35')
+                uselocale=True), "12,35")
             self.assertEqual(gcinvoice._currencyformatting(
-                Decimal("8912.34567"), uselocale=True), u'8.912,35')
+                Decimal("8912.34567"), uselocale=True), "8.912,35")
             self.assertEqual(gcinvoice._currencyformatting(
-                Decimal("8912.00000"), uselocale=True), u'8.912,00')
+                Decimal("8912.00000"), uselocale=True), "8.912,00")
             self.assertEqual(gcinvoice._currencyformatting(
                 Decimal("8912.34567"), uselocale=True, dashsymb='-'),
-                u'8.912,35')
+                "8.912,35")
             self.assertEqual(gcinvoice._currencyformatting(
                 Decimal("8912.00000"), uselocale=True, dashsymb='-'),
-                u'8.912,-')
+                "8.912,-")
             self.assertEqual(gcinvoice._currencyformatting(
                 Decimal("8912.00000"), uselocale=True,
-                dashsymb=u'\u0562~\u0122'), u'8.912,\u0562~\u0122')
+                dashsymb="\u0562~\u0122"), "8.912,\u0562~\u0122")
 
     def testQuantityformatting(self):
         """Test formatting of quantity values."""
         self.assertEqual(gcinvoice._quantityformatting(Decimal("12.34567"),
-            uselocale=False), u'12.34567')
+            uselocale=False), "12.34567")
         self.assertEqual(gcinvoice._quantityformatting(Decimal("12.34567"),
-            uselocale=False, precision=3), u'12.346')
+            uselocale=False, precision=3), "12.346")
         self.assertEqual(gcinvoice._quantityformatting(Decimal("12.00000"),
-            uselocale=False), u'12.00000')
+            uselocale=False), "12.00000")
         self.assertEqual(gcinvoice._quantityformatting(Decimal("12.00000"),
-            uselocale=False, precision=3), u'12.000')
+            uselocale=False, precision=3), "12.000")
         if test_locale:
             self.assertEqual(gcinvoice._quantityformatting(Decimal("12.34567"),
-                uselocale=True), u'12,34567')
+                uselocale=True), "12,34567")
             self.assertEqual(gcinvoice._quantityformatting(
-                Decimal("8912.34567"), uselocale=True), u'8.912,34567')
+                Decimal("8912.34567"), uselocale=True), "8.912,34567")
             self.assertEqual(gcinvoice._quantityformatting(
-                Decimal("8912.00000"), uselocale=True), u'8.912')
+                Decimal("8912.00000"), uselocale=True), "8.912")
             self.assertEqual(gcinvoice._quantityformatting(
                 Decimal("8912.34567"), uselocale=True, dashsymb='-'),
-                u'8.912,34567')
+                "8.912,34567")
             self.assertEqual(gcinvoice._quantityformatting(
                 Decimal("8912.00000"), uselocale=True, dashsymb='-'),
-                u'8.912,-')
+                "8.912,-")
             self.assertEqual(gcinvoice._quantityformatting(
                 Decimal("8912.00000"), uselocale=True,
-                dashsymb=u'\u0562~\u0122'), u'8.912,\u0562~\u0122')
+                dashsymb="\u0562~\u0122"), "8.912,\u0562~\u0122")
 
 suite.addTest(unittest.makeSuite(TestFuncs))
 
@@ -180,11 +180,11 @@ class TestYaptu(unittest.TestCase):
         rbe = re.compile('%\\+ ')
         ren = re.compile('%-')
         rco = re.compile('%= ')
-        temp_dict = {'a': 'a1', 'b': u'\u01222', 'c': 5, 'li': [5,4,3],
+        temp_dict = {'a': 'a1', 'b': "\u01222", 'c': 5, 'li': [5,4,3],
                 'di': dict(x=1, y=2)}
         templ_out = io.StringIO()
         templ_in = [(line+'\n') for line in textwrap.dedent(
-                u"""\
+                """\
                 a = @{a}
                 b = @{ b }
                 c+5 = @{ c + 5  }
@@ -206,16 +206,16 @@ class TestYaptu(unittest.TestCase):
                 %-
                 """).split('\n')]
         yaptu = gcinvoice._copier(rex, temp_dict, rbe, ren, rco,
-                ouf=templ_out, encoding='utf-8')
+                ouf=templ_out)
         yaptu.copy(templ_in)
         result = templ_out.getvalue()
         templ_out.close()
         self.assertEqual(result, textwrap.dedent(
                 """\
                 a = a1
-                b = \xc4\xa22
+                b = \u01222
                 c+5 = 10
-                Some unicode: \xc4\xa2
+                Some unicode: \u0122
                 item 0 of li is 5
                 item 1 of li is 4
                 item 2 of li is 3
@@ -609,7 +609,7 @@ class TestMain(unittest.TestCase):
         self.gc.createInvoice(1, outfile=outf, template=template)
         result = outf.getvalue()
         outf.close()
-        self.assertEqual(result, textwrap.dedent(u"""\
+        self.assertEqual(result, textwrap.dedent("""\
                 id = 1 | owner = Caesar | currency = EUR
                 notes = Items delivered in March
                 date_opened = 2008-02-22
@@ -618,7 +618,7 @@ class TestMain(unittest.TestCase):
                 terms disc-days = 10
                 terms discount = 5
                 terms due-days = 30
-                terms desc =
+                terms desc =\x20
                 amount_net_ = 14769.23076923076923076923077
                 amount_net = 14769.231
                 amount_gross_ = 19045.46153846153846153846154
@@ -628,7 +628,7 @@ class TestMain(unittest.TestCase):
                 Currency format test: 0.500
                 Quantity format test: 0.5
 
-                """).encode('utf-8'))
+                """))
         if test_locale:
             self.gc.options.quantities_uselocale = True
             self.gc.options.currency_uselocale = True
@@ -636,7 +636,7 @@ class TestMain(unittest.TestCase):
             self.gc.createInvoice(1, outfile=outf, template=template)
             result = outf.getvalue()
             outf.close()
-            self.assertEqual(result, textwrap.dedent(u"""\
+            self.assertEqual(result, textwrap.dedent("""\
                     id = 1 | owner = Caesar | currency = EUR
                     notes = Items delivered in March
                     date_opened = 2008-02-22
@@ -645,7 +645,7 @@ class TestMain(unittest.TestCase):
                     terms disc-days = 10
                     terms discount = 5
                     terms due-days = 30
-                    terms desc =
+                    terms desc =\x20
                     amount_net_ = 14769.23076923076923076923077
                     amount_net = 14.769,23
                     amount_gross_ = 19045.46153846153846153846154
@@ -655,9 +655,9 @@ class TestMain(unittest.TestCase):
                     Currency format test: 0,50
                     Quantity format test: 0,5
 
-                    """).encode('utf-8'))
+                    """))
         def cformat(val):
-            return u"dummy"
+            return "dummy"
         self.gc.options.quantities_uselocale = False
         self.gc.options.quantities_precision = 1
         self.gc.options.cformat = cformat
@@ -665,7 +665,7 @@ class TestMain(unittest.TestCase):
         self.gc.createInvoice(1, outfile=outf, template=template)
         result = outf.getvalue()
         outf.close()
-        self.assertEqual(result, textwrap.dedent(u"""\
+        self.assertEqual(result, textwrap.dedent("""\
                 id = 1 | owner = Caesar | currency = EUR
                 notes = Items delivered in March
                 date_opened = 2008-02-22
@@ -674,7 +674,7 @@ class TestMain(unittest.TestCase):
                 terms disc-days = 10
                 terms discount = 5
                 terms due-days = 30
-                terms desc =
+                terms desc =\x20
                 amount_net_ = 14769.23076923076923076923077
                 amount_net = dummy
                 amount_gross_ = 19045.46153846153846153846154
@@ -684,7 +684,7 @@ class TestMain(unittest.TestCase):
                 Currency format test: dummy
                 Quantity format test: 0.5
 
-                """).encode('utf-8'))
+                """))
 
 suite.addTest(unittest.makeSuite(TestMain))
 
@@ -708,7 +708,7 @@ class TestScript(unittest.TestCase):
                 options=options)
         result = outf.getvalue()
         outf.close()
-        self.assertEqual(result, textwrap.dedent(u"""\
+        self.assertEqual(result, textwrap.dedent("""\
                 id = 1 | owner = Caesar | currency = EUR
                 notes = Items delivered in March
                 date_opened = 2008-02-22
@@ -717,7 +717,7 @@ class TestScript(unittest.TestCase):
                 terms disc-days = 10
                 terms discount = 5
                 terms due-days = 30
-                terms desc =
+                terms desc =\x20
                 amount_net_ = 14769.23076923076923076923077
                 amount_net = 14769.231
                 amount_gross_ = 19045.46153846153846153846154
@@ -727,7 +727,7 @@ class TestScript(unittest.TestCase):
                 Currency format test: 0.500
                 Quantity format test: 0.5
 
-                """).encode('utf-8'))
+                """))
 
     def testScriptrun(self):
         """Test of running gcinvoice as a script."""
@@ -738,7 +738,7 @@ class TestScript(unittest.TestCase):
         stdout,stderr = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE,
                 env=dict(LC_ALL='de_DE.UTF-8')).communicate()
 
-        self.assertEqual(stdout, textwrap.dedent(u"""\documentclass[paper=a4,fontsize=11pt,DIV=12]{scrlttr2}
+        self.assertEqual(stdout, textwrap.dedent(r"""\documentclass[paper=a4,fontsize=11pt,DIV=12]{scrlttr2}
                 \u005Cusepackage[T1]{fontenc}
                 \u005Cusepackage{lmodern}
                 \u005Cusepackage[gen]{eurosym}
@@ -814,7 +814,7 @@ class TestScript(unittest.TestCase):
                 \end{letter}
 
                 \end{document}
-                """).encode('utf-8'))
+                """))
 
 suite.addTest(unittest.makeSuite(TestScript))
 
