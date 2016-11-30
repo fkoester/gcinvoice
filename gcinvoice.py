@@ -492,7 +492,7 @@ class Gcinvoice(object):
             templ_.close()
             try:
                 templ = open(templ)
-                self.logger.info("Using file [%s] as template" % templ)
+                self.logger.info("Using file [%s] as template" % templ.name)
             except Exception:
                 self.logger.info("The given template [%s] is not readable, "
                         "trying to use it directly as string..." % templ,
@@ -509,7 +509,7 @@ class Gcinvoice(object):
         else:
             templ = template
         if readfromfile:
-            self.logger.info("Using [%s] as file object" % templ)
+            self.logger.info("Using [%s] as file object" % templ.name)
             templ = templ.readlines()
 
         outfile = outfile or \
@@ -548,6 +548,7 @@ class Gcinvoice(object):
         cop = _copier(rex, invc, rbe, ren, rco, ouf=outf, handle=handle)
         try:
             cop.copy(templ)
+            outf.close()
         except Exception:
             self.logger.error("Error in template", exc_info=True)
             raise
