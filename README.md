@@ -3,7 +3,7 @@ ABOUT
 
 gcinvoice is a tool to parse Gnucash data
 files, and create invoices from this data using templates. It is similar to
-g2latex (http://stefans.datenbruch.de/gnucash/gc2latex.shtml) by Stefan
+[g2latex](http://stefans.datenbruch.de/gnucash/gc2latex.shtml) by Stefan
 Tomanek, but the latter was not powerful enough for my needs, and did somehow
 not work for me.
 
@@ -43,7 +43,9 @@ version 2.7 or 3.x installation.
 
 Before (and also after) installation, various tests can be run by e.g.
 
-  python test.py
+```
+python test.py
+```
 
 There might be a warning about a missing locale 'de_DE.UTF'; this special
 locale is used to test formatting of currency and quantity values. If it is
@@ -59,36 +61,50 @@ There are two ways to use gcinvoice. First, it can be run as a
 stand-alone script by simply executing it. To copy the file into your
 binary search path, simply run
 
-  python setup.py install_scripts
+```
+python setup.py install_scripts
+```
 
 where the version of python must be at least 2.5. For options, type
 
-  python setup.py install_scripts --help
+```
+python setup.py install_scripts --help
+```
 
 The other way is to install gcinvoice as a module, which is done by
 
-  python setup.py install
+```
+python setup.py install
+```
 
 installation help is available with
 
-  python setup.py install --help
+```
+python setup.py install --help
+```
 
 After installing gcinvoice this way, it can either be called as script
 with
 
-  python -m gcinvoice
+```
+python -m gcinvoice
+```
 
 or used from your own python scripts or running session using
 
-  import gcinvoice
+```python
+import gcinvoice
+```
 
 For the usage of gcinvoice, run it with option --help, and use the doc
 strings of the module. An example for running gcinvoice as a script:
 
-  ./gcinvoice.py -t mytemplate.tex  -o out.tex 13
+```
+./gcinvoice.py -t mytemplate.tex  -o out.tex 13
+```
 
-This uses the invoice with id '13' to fill out the template 'mytemplate.tex'
-and put the result into 'out.tex'. The gnucash data file is inferred in this
+This uses the invoice with id `13` to fill out the template `mytemplate.tex`
+and put the result into `out.tex`. The gnucash data file is inferred in this
 example from the configuration files, as described in the next section.
 
 CONFIGURATION
@@ -96,15 +112,15 @@ CONFIGURATION
 
 gcinvoice reads configuration files from the following places:
 
-* /etc/gcinvoicerc
+* `/etc/gcinvoicerc`
 
-* $HOME/.gcinvoicerc
+* `$HOME/.gcinvoicerc`
 
-* ./gcinvoicerc
+* `./gcinvoicerc`
 
 and all files given to gcinvoice as a configuration option. The format of
 the configuration files is defined by the python standard library module
-'ConfigParser'; the file 'gcinvoicerc' distributed with gcinvoice is a
+`ConfigParser`; the file `gcinvoicerc` distributed with gcinvoice is a
 well documented sample configuration file which can be adapted for your
 needs.
 
@@ -114,7 +130,7 @@ TEMPLATES
 gcinvoice uses a template file to generate invoices from the parsed
 Gnucash data. The templating engine 'YAPTU' is built into gcinvoice, for
 detailed information see
-http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52305.
+[http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52305](http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52305).
 In short, the template file can contain python statements, and python
 expressions identified by (configurable) regular expressions. There is
 no restriction on the used python code, hence be careful, a malicious
@@ -228,6 +244,6 @@ ISSUES:
   templates could execute code with the permissions of the user.
 
 * I think that the calculation on POSTAX discounts is wrong in Gnucash (see
-  bug report http://bugzilla.gnome.org/show_bug.cgi?id=520547). gcinvoice
+  [bug report](http://bugzilla.gnome.org/show_bug.cgi?id=520547). gcinvoice
   calculates such discounts in invoices the way I think it is correctly, hence
   the result differs for invoices with such discounts from the Gnucash result.
