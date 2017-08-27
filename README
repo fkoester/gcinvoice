@@ -1,7 +1,7 @@
 ABOUT
 -----
 
-gcinvoice (http://www.smoerz.org/gcinvoice) is a tool to parse Gnucash data
+gcinvoice is a tool to parse Gnucash data
 files, and create invoices from this data using templates. It is similar to
 g2latex (http://stefans.datenbruch.de/gnucash/gc2latex.shtml) by Stefan
 Tomanek, but the latter was not powerful enough for my needs, and did somehow
