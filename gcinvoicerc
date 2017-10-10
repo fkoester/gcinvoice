@@ -32,6 +32,9 @@ gcfile = gcdata.xml
 # default = invoice@{owner}@_template.tex
 default = invoice_template.tex
 
+## Whether to create parent directories if necessary
+mkdirs = False
+
 ## these map 'owner/name' entries in invoices to template files.
 #customer1 = specialinvoice_template.tex # (not set)
 
