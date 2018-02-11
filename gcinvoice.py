@@ -23,7 +23,7 @@ import codecs
 import configparser
 import copy
 import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 import errno
 import functools
 import gzip
@@ -494,7 +494,8 @@ class Gcinvoice(object):
             try:
                 if self.options.outfiles.get('mkdirs', None) == 'True':
                     parent = os.path.dirname(outfile)
-                    self.logger.info("Creating parent directories [{}]".format(parent))
+                    self.logger.info(
+                        "Creating parent directories [{}]".format(parent))
                     mkdir_p(parent)
                 outf = io.open(outfile, 'w', encoding='utf-8')
             except Exception:
@@ -675,10 +676,11 @@ class Gcinvoice(object):
                 if entry['amount_discount']:
                     entry['_warndiscount'] = True
                 entry['amount_gross'] = amount_raw - entry['amount_discount']
-                entry['amount_net'] = (
+                entry['amount_net'] = ((
                     entry['amount_gross'] -
                     taxtable['value_sum']) / (
-                        1 + taxtable['percent_sum'] / 100)
+                        1 + taxtable['percent_sum'] / 100)).quantize(
+                            Decimal('0.01'), rounding=ROUND_HALF_UP)
             else:
                 amount_raw_net = (amount_raw - taxtable['value_sum']) / (
                         1 + taxtable['percent_sum'] / 100)
@@ -688,10 +690,11 @@ class Gcinvoice(object):
                     entry['amount_discount'] = discount * amount_raw_net / 100
                 entry['amount_net'] = amount_raw_net - entry['amount_discount']
                 if discount_how == 'PRETAX':
-                    entry['amount_gross'] = (
+                    entry['amount_gross'] = ((
                         entry['amount_net'] *
                         (1 + taxtable['percent_sum'] / 100) +
-                        taxtable['value_sum'])
+                        taxtable['value_sum'])).quantize(
+                            Decimal('0.01'), rounding=ROUND_HALF_UP)
                 elif discount_how == 'SAMETIME':
                     entry['amount_gross'] = amount_raw - \
                         entry['amount_discount']
@@ -710,26 +713,31 @@ class Gcinvoice(object):
                     entry['_warndiscount'] = True
                 entry['amount_gross'] = amount_raw_gross - \
                     entry['amount_discount']
-                entry['amount_net'] = (
+                entry['amount_net'] = ((
                     entry['amount_gross'] -
                     taxtable['value_sum']) / (
-                    1 + (taxtable['percent_sum'] / 100))
+                    1 + (taxtable['percent_sum'] / 100))).quantize(
+                        Decimal('0.01'), rounding=ROUND_HALF_UP)
             else:
                 if discount_type == 'VALUE':
                     entry['amount_discount'] = discount
                 else:
                     entry['amount_discount'] = discount * amount_raw / 100
                 entry['amount_net'] = amount_raw - entry['amount_discount']
+
                 if discount_how == 'PRETAX':
-                    entry['amount_gross'] = entry['amount_net'] * (
-                         1 + taxtable['percent_sum'] / 100) + \
-                        taxtable['value_sum']
+                    entry['amount_gross'] = (entry['amount_net'] * (
+                         1 + taxtable['percent_sum'] / 100) +
+                        taxtable['value_sum']).quantize(
+                            Decimal('0.01'), rounding=ROUND_HALF_UP)
                 elif discount_how == 'SAMETIME':
                     amount_raw_gross = amount_raw * (
                         1 + taxtable['percent_sum'] / 100) + \
                         taxtable['value_sum']
-                    entry['amount_gross'] = amount_raw_gross - \
-                        entry['amount_discount']
+                    entry['amount_gross'] = (
+                        amount_raw_gross -
+                        entry['amount_discount']).quantize(
+                            Decimal('0.01'), rounding=ROUND_HALF_UP)
                 else:
                     raise AssertionError
         entry['amount_taxes'] = entry['amount_gross'] - entry['amount_net']
