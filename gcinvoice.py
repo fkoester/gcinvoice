@@ -816,7 +816,8 @@ def _readdate(timestring):
     """
     if timestring is None:
         return None
-    return datetime.datetime.strptime(timestring.split()[0], "%Y-%m-%d").date()
+
+    return _readdatetime(timestring).date()
 
 
 def _readdatetime(timestring):
@@ -831,8 +832,12 @@ def _readdatetime(timestring):
     """
     if timestring is None:
         return None
-    return datetime.datetime.strptime(timestring.rsplit(None, 1)[0],
-                                      "%Y-%m-%d %H:%M:%S")
+
+    return (
+        datetime.datetime.strptime(timestring, '%Y-%m-%d %H:%M:%S %z')
+        .replace(tzinfo=datetime.timezone.utc)
+        .astimezone(tz=None)
+    )
 
 
 def _currencyformatting(val, uselocale=True, precision=None, dashsymb=None):
