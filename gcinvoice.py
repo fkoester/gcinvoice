@@ -956,7 +956,7 @@ def createInvoice(invoiceid, template=None, outfile=None, options=None):
     gc.createInvoice(invoiceid, template=template, outfile=outfile)
 
 
-if __name__ == '__main__':
+def main():
     description = textwrap.dedent("""\
         gcinvoice.py extracts customer and invoice data from a Gnucash
         data file and uses a template to generate an invoice.
@@ -981,3 +981,7 @@ if __name__ == '__main__':
 
     createInvoice(args.invoiceid, template=template,
                   outfile=getattr(args, 'outfile', None), options=args)
+
+
+if __name__ == '__main__':
+    main()
