@@ -1,21 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from distutils.command.install import install as _install
-from distutils.core import setup
+from setuptools import setup
 import gcinvoice
 
 
-class install(_install):
-    """Specialized Python installer.
-
-    This installer does not run install_scripts.
-
-    """
-    sub_commands = [(x, y) for (x, y) in _install.sub_commands
-                    if x != 'install_scripts']
-
-
-setup(cmdclass={'install': install},
+setup(
       name='gcinvoice',
       version=gcinvoice.__version__,
       author='Roman Bertle',
