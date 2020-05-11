@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 from distutils.command.install import install as _install
 from distutils.core import setup
 import gcinvoice
@@ -36,12 +35,11 @@ can also be run as a script.
           'Intended Audience :: Financial and Insurance Industry',
           'License :: OSI Approved :: Python Software Foundation License',
           'Programming Language :: Python',
-          'Programming Language :: Python :: 2',
-          'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
           'Topic :: Office/Business :: Financial :: Accounting',
           ],
       py_modules=['gcinvoice', 'yaptu'],
-      scripts=['gcinvoice.py'],
+      entry_points={'console_scripts': ['gcinvoice = gcinvoice:main']},
       )

@@ -4,8 +4,6 @@
 Run this module as script to perform all tests.
 
 """
-from __future__ import print_function
-from __future__ import unicode_literals
 from builtins import str
 
 import io

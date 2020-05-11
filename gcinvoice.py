@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """Module to parse Gnucash data files and to create invoices.
@@ -11,9 +10,6 @@ run as script. Finally there is an Exception class 'GcinvoiceError'. These are
 the only 3 names imported by 'import * from gcinvoice'.
 
 """
-# Needed for Python2 compatibility, remove later
-from __future__ import division
-from __future__ import unicode_literals
 from builtins import object, str
 
 __version__ = '0.1.5'

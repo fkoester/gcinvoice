@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 from builtins import str
 from builtins import object
 # This is the Yet Another Python Templating Utility, Version 1.2
